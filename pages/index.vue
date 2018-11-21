@@ -49,10 +49,10 @@ export default {
         .replace(/([^\d|^)])([-|+]\d+)/g, '$1(0$2)')
         .replace(/([^\d])\./g, '$10.')
         .replace(/^(\.\d+)/, '0$1')
-      console.log(inputText, 777)
+
       if (this.inValidCharCheck(inputText) === true && inputText !== '') {
         const rpnList = this.rpn(inputText)
-        console.log('a:', rpnList)
+
         this.answer = String(this.calculateByRPN(rpnList))
       } else if (inputText == '') {
         this.answer = ''
@@ -88,25 +88,31 @@ export default {
       let normalFormulaList = []
 
       while (1) {
-        let matchValue = inputText.match(/\d+(?:\.\d+)?/)
+        let matchNumber = inputText.match(/\d+(?:\.\d+)?/)
+        let matchOperator = inputText.match(/[^\d]/)
+        console.log(matchNumber, inputText, normalFormulaList)
 
-        if (matchValue !== null) {
-          normalFormulaList.push(matchValue[0])
-          inputText = inputText.replace(matchValue[0], '')
-        } else {
-          normalFormulaList.push(inputText[0])
-          inputText = inputText.slice(1)
+        if (matchNumber !== null) {
+          if (matchNumber.index === 0) {
+            normalFormulaList.push(matchNumber[0])
+            inputText = inputText.replace(matchNumber[0], '')
+            continue
+          }
+        }
+        if (matchOperator !== null) {
+          if (matchOperator.index === 0) {
+            normalFormulaList.push(matchOperator[0])
+            inputText = inputText.slice(1)
+            continue
+          }
         }
 
         if (inputText === '') {
           break
         }
       }
-
-      // console.log(normalFormulaList, 111)
-
+      console.log(normalFormulaList)
       for (const token of normalFormulaList) {
-        console.log('AA', token, rpnList)
         if (token === '.') {
           return []
         }
@@ -118,7 +124,7 @@ export default {
             if (stack.length === 0) {
               break
             }
-            console.log(stack)
+
             const topStack = stack[stack.length - 1]
             if (topStack === LEFT_BRACKET) {
               stack.pop()
@@ -139,6 +145,13 @@ export default {
             } else {
               const topStack = stack[stack.length - 1]
               if (topStack !== LEFT_BRACKET) {
+                console.log(
+                  token,
+                  topStack,
+                  stack,
+                  rpnList,
+                  MATH[token]['priority'] > MATH[topStack]['priority']
+                )
                 if (MATH[token]['priority'] > MATH[topStack]['priority']) {
                   // rpnList.push(stack.pop())
                   stack.push(token)
