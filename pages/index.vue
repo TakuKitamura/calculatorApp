@@ -122,7 +122,7 @@ export default {
         } else if (token === RIGHT_BRACKET) {
           while (1) {
             if (stack.length === 0) {
-              break
+              return []
             }
 
             const topStack = stack[stack.length - 1]
@@ -172,12 +172,20 @@ export default {
 
       const stackLength = stack.length
       for (let i = 0; i < stackLength; i++) {
+        console.log(stack, 333)
+        if (stack[i] === LEFT_BRACKET || stack[i] === RIGHT_BRACKET) {
+          return []
+        }
         rpnList.push(stack.pop())
       }
       console.log('result: ', rpnList)
       return rpnList
     },
     calculateByRPN(rpnList) {
+      if (rpnList.length === 0) {
+        console.log('unknown error')
+        return 'well...'
+      }
       let stack = []
       let accumulator = []
 
