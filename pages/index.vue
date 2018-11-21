@@ -19,10 +19,12 @@
 
 <script>
 const MATH = {
-  '+': { priority: 2, f: (x, y) => Number(x) + Number(y) },
-  '-': { priority: 2, f: (x, y) => Number(x) - Number(y) },
+  '^': { priority: 2, f: (x, y) => Number(x) ** Number(y) },
   '*': { priority: 3, f: (x, y) => Number(x) * Number(y) },
-  '/': { priority: 3, f: (x, y) => Number(x) / Number(y) }
+  '/': { priority: 3, f: (x, y) => Number(x) / Number(y) },
+  '%': { priority: 3, f: (x, y) => Number(x) % Number(y) },
+  '+': { priority: 4, f: (x, y) => Number(x) + Number(y) },
+  '-': { priority: 4, f: (x, y) => Number(x) - Number(y) }
 }
 const OPERATORS = Object.keys(MATH).join('')
 const NUMBERS = '0123456789'
@@ -90,7 +92,7 @@ export default {
       while (1) {
         let matchNumber = inputText.match(/\d+(?:\.\d+)?/)
         let matchOperator = inputText.match(/[^\d]/)
-        console.log(matchNumber, inputText, normalFormulaList)
+        console.log(matchNumber, matchOperator)
 
         if (matchNumber !== null) {
           if (matchNumber.index === 0) {
@@ -99,6 +101,7 @@ export default {
             continue
           }
         }
+
         if (matchOperator !== null) {
           if (matchOperator.index === 0) {
             normalFormulaList.push(matchOperator[0])
@@ -152,14 +155,12 @@ export default {
                   rpnList,
                   MATH[token]['priority'] > MATH[topStack]['priority']
                 )
-                if (MATH[token]['priority'] > MATH[topStack]['priority']) {
+                if (MATH[token]['priority'] < MATH[topStack]['priority']) {
                   // rpnList.push(stack.pop())
                   stack.push(token)
                   break
                 } else {
-                  // stack.push(token)
                   rpnList.push(stack.pop())
-                  // break
                 }
               } else {
                 stack.push(token)
