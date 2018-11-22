@@ -44,13 +44,15 @@ export default {
     inputChange(inputText) {
       inputText = inputText
         .replace(/ /g, '')
-        .replace(/(\d+\.)([^\d])/, '$10$2') // 3.* -> 3.0*
+
+        .replace(/(\d+\.)([^\d])/g, '$10$2') // 3.* -> 3.0*
         .replace(/(\d+\.)$/, '$10') // 3.$ -> 3.0$
-        .replace(/([-|+])[\(|\.]/g, '$11*(') // -( -> -1*(
-        .replace(/^([-|+]\d+)/, '(0$1)') // ^-3 -> ^0-3
-        .replace(/([^\d|^)])([-|+]\d+)/g, '$1(0$2)') // *-2 -> *(0-2)
         .replace(/([^\d])\./g, '$10.') // *. -> *0.
         .replace(/^(\.\d+)/, '0$1') //^.2 ->^ 0.2
+
+        .replace(/([-|+])\(/g, '$11*(') // -( -> -1*(
+        .replace(/^([-|+]\d+\.?\d*|\.\d+)/, '(0$1)') // ^-3.0 -> ^0-3.0
+        .replace(/([^\d|^)])([-|+]\d+\.?\d*|\.\d+)/g, '$1(0$2)') // *-2.0 -> *(0-2.0)
 
       if (this.inValidCharCheck(inputText) === true && inputText !== '') {
         const rpnList = this.rpn(inputText)
@@ -90,9 +92,8 @@ export default {
       let normalFormulaList = []
 
       while (1) {
-        let matchNumber = inputText.match(/\d+(?:\.\d+)?/)
+        let matchNumber = inputText.match(/\d+\.?\d*|\.\d+/)
         let matchOperator = inputText.match(/[^\d]/)
-        console.log(matchNumber, matchOperator)
 
         if (matchNumber !== null) {
           if (matchNumber.index === 0) {
@@ -114,7 +115,7 @@ export default {
           break
         }
       }
-      console.log(normalFormulaList)
+
       for (const token of normalFormulaList) {
         if (token === '.') {
           return []
@@ -148,13 +149,6 @@ export default {
             } else {
               const topStack = stack[stack.length - 1]
               if (topStack !== LEFT_BRACKET) {
-                console.log(
-                  token,
-                  topStack,
-                  stack,
-                  rpnList,
-                  MATH[token]['priority'] > MATH[topStack]['priority']
-                )
                 if (MATH[token]['priority'] < MATH[topStack]['priority']) {
                   // rpnList.push(stack.pop())
                   stack.push(token)
@@ -173,11 +167,16 @@ export default {
 
       const stackLength = stack.length
       for (let i = 0; i < stackLength; i++) {
-        console.log(stack, 333)
         if (stack[i] === LEFT_BRACKET || stack[i] === RIGHT_BRACKET) {
+          console.log(stack[i], 'AAA')
           return []
         }
         rpnList.push(stack.pop())
+      }
+
+      if (rpnList.includes(LEFT_BRACKET) || rpnList.includes(RIGHT_BRACKET)) {
+        console.log('result: ', rpnList)
+        return []
       }
       console.log('result: ', rpnList)
       return rpnList
@@ -191,7 +190,7 @@ export default {
       let accumulator = []
 
       for (const token of rpnList) {
-        const existNumber = token.match(/\d+(?:\.\d+)?/) !== null
+        const existNumber = token.match(/\d+\.?\d*|\.\d+/) !== null
         const existOperator = OPERATORS.indexOf(token) > -1
         if (existNumber || existOperator) {
           if (existNumber) {
