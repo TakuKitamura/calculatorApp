@@ -44,13 +44,13 @@ export default {
     inputChange(inputText) {
       inputText = inputText
         .replace(/ /g, '')
-        .replace(/(\d+\.)([^\d])/, '$10$2')
-        .replace(/(\d+\.)$/, '$10')
-        .replace(/(^[-|+])\(/, '$11*(')
-        .replace(/^([-|+]\d+)/, '(0$1)')
-        .replace(/([^\d|^)])([-|+]\d+)/g, '$1(0$2)')
-        .replace(/([^\d])\./g, '$10.')
-        .replace(/^(\.\d+)/, '0$1')
+        .replace(/(\d+\.)([^\d])/, '$10$2') // 3.* -> 3.0*
+        .replace(/(\d+\.)$/, '$10') // 3.$ -> 3.0$
+        .replace(/([-|+])\(/, '$11*(') // -( -> -1*(
+        .replace(/^([-|+]\d+)/, '(0$1)') // ^-3 -> ^0-3
+        .replace(/([^\d|^)])([-|+]\d+)/g, '$1(0$2)') // *-2 -> *(0-2)
+        .replace(/([^\d])\./g, '$10.') // *. -> *0.
+        .replace(/^(\.\d+)/, '0$1') //^.2 ->^ 0.2
 
       if (this.inValidCharCheck(inputText) === true && inputText !== '') {
         const rpnList = this.rpn(inputText)
