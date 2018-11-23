@@ -15,11 +15,11 @@
         </div>
         <div class="calculator-items">
             <div class="calculator-row-1">
-                <div class="calculator-item" @click="drop()">DEL</div>
                 <div class="calculator-item" @click="cleanAll()">C</div>
-                <div class="calculator-item" @click="toggle()">±</div>
                 <div class="calculator-item" @click="addMark('(')">(</div>
                 <div class="calculator-item" @click="addMark(')')">)</div>
+                <div class="calculator-item" @click="toggle()">±</div>
+                <div class="calculator-item" @click="drop()">DEL</div>
             </div>
             <div class="calculator-row-2">
                 <div class="calculator-item" @click="addMark('7')">7</div>
@@ -104,24 +104,25 @@ export default {
         .replace(/^([-|+]\d+\.?\d*|\.\d+)/, '(0$1)') // ^-3.0 -> ^0-3.0
         .replace(/([^\d|^)])([-|+]\d+\.?\d*|\.\d+)/g, '$1(0$2)') // *-2.0 -> *(0-2.0)
 
-      const err = this.inValidCharCheck(inputText)
+      const inValidCharCheckErr = this.inValidCharCheck(inputText)
 
-      if (err !== null) {
-        this.result = this.escapeHtml(String(err))
+      if (inValidCharCheckErr !== null) {
+        this.result = this.escapeHtml(String(inValidCharCheckErr))
         return
       }
 
-      if (inputText !== '') {
-        const [rpnList, err] = this.rpn(inputText)
-        if (err !== null) {
-          this.result = this.escapeHtml(err)
-          return
-        }
-        const result = this.calculateByRPN(rpnList)
-        this.result = this.escapeHtml(String(this.calculateByRPN(rpnList)))
-      } else if (inputText == '') {
+      if (inputText == '') {
         this.result = ''
       }
+
+      const [rpnList, rpnErr] = this.rpn(inputText)
+      if (rpnErr !== null) {
+        this.result = this.escapeHtml(rpnErr)
+        return
+      }
+
+      const result = this.calculateByRPN(rpnList)
+      this.result = this.escapeHtml(String(this.calculateByRPN(rpnList)))
     },
     inValidCharCheck(inputText) {
       const wordsList = inputText.split('')
