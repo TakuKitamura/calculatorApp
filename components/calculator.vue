@@ -277,7 +277,7 @@ export default {
             if (isNaN(accumulator) === true) {
               const err = 'unexpected accumulator: [' + accumulator + '].'
               console.log(err)
-              return this.formula
+              return NaN
             }
 
             stack.push(accumulator)

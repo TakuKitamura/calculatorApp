@@ -1,21 +1,4 @@
 <template>
-  <!-- <v-layout column justify-center align-center>
-    <v-flex xs12 sm8 md6>
-      <v-card>
-        <v-card-title class="headline">Calculate App</v-card-title>
-        <v-container fluid>
-          <v-text-field
-            v-model="inputValue"
-            color="cyan darken"
-            placeholder="I'm ready."
-            @input="inputChange"
-          />
-          = {{ answer }}
-        </v-container>
-      </v-card>
-    </v-flex>
-  </v-layout>-->
-
   <div id="calculator">
     <header>
       <h1>Calculator</h1>
@@ -79,7 +62,7 @@ header,
   -ms-border-radius: 1rem;
   -o-border-radius: 1rem;
   border-radius: 1rem;
-  :-webkit-box-shadow: 1rem 1rem 0.5rem #212121;
+  -webkit-box-shadow: 1rem 1rem 0.5rem #212121;
   box-shadow: 0.5rem 0.5rem 0.25rem #212121;
 }
 </style>
