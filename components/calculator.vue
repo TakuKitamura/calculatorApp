@@ -3,7 +3,7 @@
         <div class="calculator-display">
             <v-text-field
                 v-cloak
-                v-model="inputValue"
+                v-model="formula"
                 class="calculator-formula"
                 color="cyan darken"
                 placeholder="I'm ready."
@@ -11,11 +11,11 @@
                 @input="inputChange"
                 @keyup.escape="cleanAll()"
             />
-            <div v-cloak class="calculator-result">= {{ answer }}</div>
+            <div v-cloak class="calculator-result">= {{ result }}</div>
         </div>
         <div class="calculator-items">
             <div class="calculator-row-1">
-                <div class="calculator-item" @click="drop()">←</div>
+                <div class="calculator-item" @click="drop()">DEL</div>
                 <div class="calculator-item" @click="cleanAll()">C</div>
                 <div class="calculator-item" @click="toggle()">±</div>
                 <div class="calculator-item" @click="addMark('(')">(</div>
@@ -56,7 +56,7 @@ const MATH = {
   '^': { priority: 2, f: (x, y) => Number(x) ** Number(y) },
   '*': { priority: 3, f: (x, y) => Number(x) * Number(y) },
   '/': { priority: 3, f: (x, y) => Number(x) / Number(y) },
-  mod: { priority: 3, f: (x, y) => Number(x) % Number(y) },
+  '%': { priority: 3, f: (x, y) => Number(x) % Number(y) },
   '+': { priority: 4, f: (x, y) => Number(x) + Number(y) },
   '-': { priority: 4, f: (x, y) => Number(x) - Number(y) }
 }
@@ -69,27 +69,27 @@ const DOT = '.'
 export default {
   name: 'CalculatorContent',
   data: () => ({
-    inputValue: '',
-    answer: ''
+    formula: '',
+    result: ''
   }),
   methods: {
     drop() {
-      this.inputValue = this.inputValue.slice(0, -1)
-      this.inputChange(this.inputValue)
+      this.formula = this.formula.slice(0, -1)
+      this.inputChange(this.formula)
     },
     cleanAll() {
-      this.inputValue = ''
-      this.inputChange(this.inputValue)
+      this.formula = ''
+      this.inputChange(this.formula)
     },
     toggle() {
-      if (this.answer !== '' && isNaN(Number(this.answer)) === false) {
-        this.inputValue = String(Number(this.answer) * -1)
-        this.inputChange(this.inputValue)
+      if (this.result !== '' && isNaN(Number(this.result)) === false) {
+        this.formula = String(Number(this.result) * -1)
+        this.inputChange(this.formula)
       }
     },
     addMark(v) {
-      this.inputValue += v
-      this.inputChange(this.inputValue)
+      this.formula += v
+      this.inputChange(this.formula)
     },
     inputChange(inputText) {
       inputText = inputText
@@ -107,20 +107,20 @@ export default {
       const err = this.inValidCharCheck(inputText)
 
       if (err !== null) {
-        this.answer = String(err)
+        this.result = this.escapeHtml(String(err))
         return
       }
 
       if (inputText !== '') {
         const [rpnList, err] = this.rpn(inputText)
         if (err !== null) {
-          this.answer = err
+          this.result = this.escapeHtml(err)
           return
         }
-        const answer = this.calculateByRPN(rpnList)
-        this.answer = String(this.calculateByRPN(rpnList))
+        const result = this.calculateByRPN(rpnList)
+        this.result = this.escapeHtml(String(this.calculateByRPN(rpnList)))
       } else if (inputText == '') {
-        this.answer = ''
+        this.result = ''
       }
     },
     inValidCharCheck(inputText) {
@@ -246,15 +246,17 @@ export default {
         const err = 'mismatch bracket.'
         return [null, err]
       }
+
+      if (rpnList.length === 0) {
+        const err = 'unknown error.'
+        return [null, err]
+      }
+
       console.log('result: ', rpnList)
       const err = null
       return [rpnList, err]
     },
     calculateByRPN(rpnList) {
-      if (rpnList.length === 0) {
-        console.log('unknown error')
-        return NaN
-      }
       let stack = []
       let accumulator = []
 
@@ -275,7 +277,7 @@ export default {
             if (isNaN(accumulator) === true) {
               const err = 'unexpected accumulator: [' + accumulator + '].'
               console.log(err)
-              return NaN
+              return this.formula
             }
 
             stack.push(accumulator)
@@ -288,13 +290,25 @@ export default {
         }
       }
 
-      if (stack.length !== 1) {
+      if (stack.length > 1) {
+        if (stack[1] === '.') {
+          const err = 'unexpected [.].'
+          return err
+        }
         console.log('failed calculate.')
         console.log('now stack: ' + stack)
         return NaN
       }
 
       return stack[0]
+    },
+    escapeHtml(unsafe) {
+      return unsafe
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
     }
   }
 }
@@ -320,7 +334,7 @@ export default {
   -ms-border-radius: 0.4rem;
   -o-border-radius: 0.4rem;
   border-radius: 0.4rem;
-  :-webkit-box-shadow: 1rem 1rem 0.5rem #263238;
+  -webkit-box-shadow: 1rem 1rem 0.5rem #263238;
   box-shadow: 0.1rem 0.1rem 0.5rem #263238;
 }
 
@@ -383,7 +397,7 @@ export default {
   -ms-border-radius: 0.5rem;
   -o-border-radius: 0.5rem;
   border-radius: 0.5rem;
-  :background-color: rgba(244, 135, 135, 0.78);
+  /* background-color: rgba(244, 135, 135, 0.78); */
   -webkit-box-shadow: 0.1rem 0.1rem 0.3rem #37474f;
   box-shadow: 0.1rem 0.1rem 0.3rem #37474f;
   transition: all 0.1s;
