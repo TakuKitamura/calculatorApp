@@ -249,8 +249,7 @@ export default {
       }
 
       if (rpnList.length === 0) {
-        const err = 'unknown error.'
-        return [null, err]
+        return [null, '']
       }
 
       console.log('result: ', rpnList)
